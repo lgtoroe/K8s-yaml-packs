@@ -1,0 +1,68 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: seeder
+  labels:
+    app: seeder
+spec:
+  ports:
+    - port: 3000
+  selector:
+    app: seeder
+  clusterIP: None
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: seeder-pv-claim
+  namespace: seeder
+  labels:
+    app: seeder
+spec:
+  accessModes: [ ReadWriteOnce ]
+  resources:
+    requests:
+      storage: 500Gi
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: seeder
+  labels:
+    app: seeder
+spec:
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: seeder
+    spec:
+      containers:
+      - image: jpillora/cloud-torrent
+        name: seeder
+        - containerPort: 3000
+          name: seeder
+        volumeMounts:
+        - name: seeder-persistent-storage
+          mountPath: /downloads
+      volumes:
+      - name: seeder-persistent-storage
+        persistentVolumeClaim:
+          claimName: seeder-pv-claim
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: seeder
+  labels:
+    name: seeder
+spec:
+  rules:
+  - host: "seeder.cl.nedp.io" # Replace host with your domain for ingress service !!!
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: seeder
+          servicePort: 3000

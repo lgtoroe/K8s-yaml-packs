@@ -1,0 +1,28 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: seeder
+  namespace: seeder
+  labels:
+    app: seeder
+spec:
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: seeder
+    spec:
+      containers:
+      - image: jpillora/cloud-torrent
+        name: seeder
+        ports:
+        - containerPort: 3000
+          name: seeder
+        volumeMounts:
+        - name: seeder-persistent-storage
+          mountPath: /downloads
+      volumes:
+      - name: seeder-persistent-storage
+        persistentVolumeClaim:
+          claimName: seeder-pv-claim
