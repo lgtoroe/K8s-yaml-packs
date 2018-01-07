@@ -1,3 +1,4 @@
 # Ignore Folder for Testing Scripts
-testing/
-testing/*
+/testing/
+/testing/*
+/testing/*.*
